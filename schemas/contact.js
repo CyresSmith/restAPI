@@ -1,5 +1,6 @@
 const { Schema, model } = require('mongoose');
 const { handleMongooseError } = require('../helpers');
+const emailRegexp = require('./emailRegexp');
 
 const Joi = require('joi');
 const CustomJoi = Joi.extend(require('joi-phone-number'));
@@ -11,7 +12,9 @@ const contact = new Schema(
       required: [true, 'Name is required to create a contact'],
     },
     email: {
+      required: [true, 'Email is required'],
       type: String,
+      match: emailRegexp,
       unique: true,
     },
     phone: {
@@ -22,6 +25,11 @@ const contact = new Schema(
     favorite: {
       type: Boolean,
       default: false,
+    },
+    owner: {
+      type: Schema.Types.ObjectId,
+      ref: 'user',
+      required: true,
     },
   },
   { versionKey: false, timestamps: true }
@@ -39,16 +47,12 @@ const contactAddShema = CustomJoi.object({
     'string.base': `"Name" must be string`,
   }),
 
-  email: Joi.string()
-    .email({
-      minDomainSegments: 2,
-    })
-    .required()
-    .messages({
-      'any.required': `"Email" is required`,
-      'string.empty': `"Email" cannot be empty`,
-      'string.base': `"Email" must be string`,
-    }),
+  email: Joi.string().pattern(emailRegexp).required().messages({
+    'any.required': `"Email" is required`,
+    'string.empty': `"Email" cannot be empty`,
+    'string.base': `"Email" must be string`,
+    'string.pattern.base': `"Email" doesn't look like an email`,
+  }),
 
   phone: CustomJoi.string()
     .phoneNumber({ format: 'international' })
@@ -71,14 +75,11 @@ const contactUpdateShema = CustomJoi.object({
     'string.base': `"Name" must be string`,
   }),
 
-  email: Joi.string()
-    .email({
-      minDomainSegments: 2,
-    })
-    .messages({
-      'string.empty': `"Email" cannot be empty`,
-      'string.base': `"Email" must be string`,
-    }),
+  email: Joi.string().pattern(emailRegexp).messages({
+    'string.empty': `"Email" cannot be empty`,
+    'string.base': `"Email" must be string`,
+    'string.pattern.base': `"Email" doesn't look like an email`,
+  }),
 
   phone: CustomJoi.string().phoneNumber({ format: 'international' }).messages({
     'string.empty': `"Phone" cannot be empty`,
@@ -97,7 +98,7 @@ const statusUpdateShema = CustomJoi.object({
   }),
 });
 
-const validation = {
+const contactsValidation = {
   contactAddShema,
   contactUpdateShema,
   statusUpdateShema,
@@ -105,4 +106,4 @@ const validation = {
 
 const Contact = model('contact', contact);
 
-module.exports = { Contact, validation };
+module.exports = { Contact, contactsValidation };
