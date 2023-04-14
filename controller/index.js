@@ -5,7 +5,15 @@ const {
   update,
   updateStatus,
   remove,
-} = require('./controller');
+} = require('./contactsController');
+
+const {
+  register,
+  login,
+  current,
+  subscription,
+  logout,
+} = require('./authController');
 
 module.exports = {
   getAll,
@@ -14,4 +22,9 @@ module.exports = {
   update,
   updateStatus,
   remove,
+  register,
+  login,
+  current,
+  subscription,
+  logout,
 };

@@ -5,7 +5,23 @@ const { httpError, ctrlWrapper } = require('../helpers');
  * ============================ Получение всех контакта
  */
 const getAllContacts = async (req, res) => {
-  const result = await Contact.find();
+  const { _id: owner } = req.user;
+
+  const { page = 1, limit = 10, favorite = false } = req.query;
+
+  const skip = (page - 1) * limit;
+
+  const sortByFavorite = () => {
+    if (!favorite) {
+      return { owner };
+    }
+    return { owner, favorite };
+  };
+
+  const result = await Contact.find(sortByFavorite(), '-createdAt -updatedAt', {
+    skip,
+    limit,
+  }).populate('owner', 'name email');
 
   if (!result) {
     throw httpError(404, 'Contacts not found');
@@ -33,7 +49,8 @@ const getContactById = async (req, res) => {
  * ============================ Добавление контакта
  */
 const createContact = async (req, res) => {
-  const result = await Contact.create(req.body);
+  const { _id: owner } = req.user;
+  const result = await Contact.create({ ...req.body, owner });
   res.status(201).json(result);
 };
 
