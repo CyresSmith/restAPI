@@ -1,10 +1,14 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const gravatar = require('gravatar');
+const fs = require('fs/promises');
+const path = require('path');
 require('dotenv').config();
 
 const { User } = require('../schemas');
-const { httpError, ctrlWrapper } = require('../helpers');
+const { httpError, ctrlWrapper, resizeImage } = require('../helpers');
 const { SECRET } = process.env;
+const avatarsDir = path.join(__dirname, '../', 'public', 'avatars');
 
 /**
  * ============================ Регистрация пользователя
@@ -19,8 +23,13 @@ const registerUser = async (req, res) => {
   }
 
   const hashPassword = await bcrypt.hash(password, 10);
+  const avatarUrl = gravatar.url(email);
 
-  const newUser = await User.create({ ...req.body, password: hashPassword });
+  const newUser = await User.create({
+    ...req.body,
+    password: hashPassword,
+    avatarUrl,
+  });
 
   res.status(201).json({
     name: newUser.name,
@@ -52,13 +61,14 @@ const loginUser = async (req, res) => {
     name: user.name,
     email: user.email,
     subscription: user.subscription,
+    avatarUrl: user.avatarUrl,
   };
 
   const token = jwt.sign(payload, SECRET, { expiresIn: '23h' });
 
   await User.findByIdAndUpdate(user._id, { token });
 
-  res.status(201).json({
+  res.status(200).json({
     token,
     user: payload,
   });
@@ -98,10 +108,34 @@ const logout = async (req, res) => {
   res.status(200).json({ message: `Successfully logout` });
 };
 
+/**
+ * ============================ Обновление аватарки пользователя
+ */
+const updateAvatar = async (req, res) => {
+  const { id } = req.user;
+  const { path: tempUpload, filename } = req.file;
+
+  const avatarName = `${id}_${filename}`;
+  const resultUpload = path.join(avatarsDir, avatarName);
+
+  await resizeImage(tempUpload, 250, 250);
+
+  await fs.rename(tempUpload, resultUpload);
+  const avatarUrl = path.join('avatars', avatarName);
+
+  await User.findByIdAndUpdate(id, { avatarUrl });
+
+  res.status(200).json({
+    avatarUrl,
+    message: `Avatar successfully changed`,
+  });
+};
+
 module.exports = {
   register: ctrlWrapper(registerUser),
   login: ctrlWrapper(loginUser),
   current: ctrlWrapper(getCurrentUser),
   subscription: ctrlWrapper(subscriptionUpdate),
   logout: ctrlWrapper(logout),
+  updateAvatar: ctrlWrapper(updateAvatar),
 };
