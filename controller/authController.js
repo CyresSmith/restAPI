@@ -43,7 +43,7 @@ const registerUser = async (req, res) => {
   });
 
   const verifycationEmail = {
-    to: `${email}`,
+    to: email,
     subject: 'Verifycation email',
     html: `<a target="_blank" href="${BASE_URL}/api/users/verify/${verifycationToken}" >Click here to verify your email</a>`,
   };
@@ -96,9 +96,9 @@ const reVerify = async (req, res) => {
   }
 
   const verifycationEmail = {
-    email,
+    to: email,
     subject: 'Verifycation email',
-    html: `<a target="_blank" href="${BASE_URL}/api/users/verify/${user.verifycationCode}" >Click here to verify your email</a>`,
+    html: `<a target="_blank" href="${BASE_URL}/api/users/verify/${user.verifycationToken}">Click here to verify your email</a>`,
   };
 
   await sendEmail.nodemailer(verifycationEmail);
