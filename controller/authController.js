@@ -48,7 +48,7 @@ const registerUser = async (req, res) => {
     html: `<a target="_blank" href="${BASE_URL}/api/users/verify/${verifycationToken}" >Click here to verify your email</a>`,
   };
 
-  await sendEmail(verifycationEmail);
+  await sendEmail.nodemailer(verifycationEmail);
 
   res.status(201).json({
     name: newUser.name,
@@ -101,7 +101,7 @@ const reVerify = async (req, res) => {
     html: `<a target="_blank" href="${BASE_URL}/api/users/verify/${user.verifycationCode}" >Click here to verify your email</a>`,
   };
 
-  await sendEmail(verifycationEmail);
+  await sendEmail.nodemailer(verifycationEmail);
 
   res.status(200).json({
     message: `Verification email sent`,
@@ -136,6 +136,7 @@ const loginUser = async (req, res) => {
     email: user.email,
     subscription: user.subscription,
     avatarUrl: user.avatarUrl,
+    verify: user.verify,
   };
 
   const token = jwt.sign(payload, SECRET, { expiresIn: '23h' });
@@ -152,9 +153,11 @@ const loginUser = async (req, res) => {
  * ============================ Текущий пользователь
  */
 const getCurrentUser = async (req, res) => {
-  const { name, email, subscription } = req.user;
+  const { name, email, subscription, avatarUrl, verify, _id } = req.user;
 
-  res.status(200).json({ name, email, subscription });
+  res
+    .status(200)
+    .json({ name, email, subscription, avatarUrl, verify, id: _id });
 };
 
 /**

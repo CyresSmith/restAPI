@@ -14,11 +14,7 @@ const authentication = async (req, res, next) => {
   }
 
   try {
-    console.log('token in authentication:', token);
-
     const response = jwt.verify(token, SECRET);
-
-    console.log('response: ', response);
 
     const user = await User.findById(response.id);
 

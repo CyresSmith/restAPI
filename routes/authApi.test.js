@@ -338,24 +338,19 @@ describe('test api/users/current route', () => {
 
     const { token } = loginUserRes.body;
 
-    console.log('token in login response body: ', token);
-
     const res = await request(app)
       .get('/api/users/current')
       .set('Authorization', `Bearer ${token}`)
       .send();
 
-    console.log('res:::::::::::::::::::::::::::::::::::::::::: ', res.body);
-
     expect(registerUserRes.statusCode).toBe(201);
     expect(loginUserRes.statusCode).toBe(200);
     expect(res.statusCode).toBe(200);
-    // expect(res.body.user.name).toBe(registerData.name);
-    // expect(res.body.user.email).toBe(registerData.email);
-    // expect(res.body.user.).toBe(registerData.email);
-    // expect(res.body.user.avatarUrl).toBeDefined();
-    // expect(res.body.user.avatarUrl).not.toBeNull();
-    // expect(res.body.token).toBeDefined();
-    // expect(res.body.token).not.toBeNull();
+    expect(res.body.user.name).toBe(registerData.name);
+    expect(res.body.user.email).toBe(registerData.email);
+    expect(res.body.user.avatarUrl).toBeDefined();
+    expect(res.body.user.avatarUrl).not.toBeNull();
+    expect(res.body.user.subscription).toBeDefined();
+    expect(res.body.user.subscription).not.toBeNull();
   });
 });
