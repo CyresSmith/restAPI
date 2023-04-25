@@ -9,6 +9,8 @@ const {
 
 const {
   register,
+  verify,
+  reVerify,
   login,
   current,
   subscription,
@@ -24,6 +26,8 @@ module.exports = {
   updateStatus,
   remove,
   register,
+  verify,
+  reVerify,
   login,
   current,
   subscription,

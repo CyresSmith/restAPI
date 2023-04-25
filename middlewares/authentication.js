@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken');
+require('dotenv').config();
 
 const { httpError } = require('../helpers');
 const { User } = require('../schemas');
@@ -13,9 +14,13 @@ const authentication = async (req, res, next) => {
   }
 
   try {
-    const { id } = jwt.verify(token, SECRET);
+    console.log('token in authentication:', token);
 
-    const user = await User.findById(id);
+    const response = jwt.verify(token, SECRET);
+
+    console.log('response: ', response);
+
+    const user = await User.findById(response.id);
 
     if (!user || !user.token) {
       next(httpError(401));
