@@ -33,6 +33,14 @@ const user = new Schema(
       type: String,
       required: [true, 'Avatar url is required'],
     },
+    verify: {
+      type: Boolean,
+      default: false,
+    },
+    verifycationToken: {
+      type: String,
+      default: null,
+    },
   },
   { versionKey: false, timestamps: true }
 );
@@ -55,6 +63,18 @@ const userRegisterShema = Joi.object({
 
   email: Joi.string().pattern(emailRegexp).required().messages({
     'any.required': `"Email" is required`,
+    'string.empty': `"Email" cannot be empty`,
+    'string.base': `"Email" must be string`,
+    'string.pattern.base': `"Email" doesn't look like an email`,
+  }),
+});
+
+/**
+ * Схема валидации email.
+ */
+const emailShema = Joi.object({
+  email: Joi.string().pattern(emailRegexp).required().messages({
+    'any.required': `Missing required field email`,
     'string.empty': `"Email" cannot be empty`,
     'string.base': `"Email" must be string`,
     'string.pattern.base': `"Email" doesn't look like an email`,
@@ -90,6 +110,7 @@ user.post('save', handleMongooseError);
 
 const userValidation = {
   userRegisterShema,
+  emailShema,
   userLoginShema,
   subscriptionShema,
 };

@@ -103,9 +103,7 @@ describe('test api/users/register route', () => {
       password: '123456',
     };
 
-    const res_1 = await request(app)
-      .post('/api/users/register')
-      .send(registerData);
+    await request(app).post('/api/users/register').send(registerData);
 
     const res = await request(app)
       .post('/api/users/register')
@@ -291,72 +289,68 @@ describe('test api/users/login route', () => {
   });
 });
 
-// /**
-//  * ===========================================================================================
-//  * testing current route ========================================
-//  */
-// describe('test api/users/current route', () => {
-//   let server = null;
+/**
+ * ===========================================================================================
+ * testing current route ========================================
+ */
+describe('test api/users/current route', () => {
+  let server = null;
 
-//   beforeAll(async () => {
-//     server = app.listen(PORT);
+  beforeAll(async () => {
+    server = app.listen(PORT);
 
-//     await mongoose.connect(DB_HOST_TEST);
-//   });
+    await mongoose.connect(DB_HOST_TEST);
+  });
 
-//   afterAll(async () => {
-//     server.close();
-//     await mongoose.connection.close();
-//   });
+  afterAll(async () => {
+    server.close();
+    await mongoose.connection.close();
+  });
 
-//   beforeEach(async () => {});
+  beforeEach(async () => {});
 
-//   afterEach(async () => {
-//     // await User.deleteMany();
-//   });
+  afterEach(async () => {
+    await User.deleteMany();
+  });
 
-//   /**
-//    * testing current route ========================================
-//    */
-//   test('test get current user', async () => {
-//     const registerData = {
-//       name: 'Ivan',
-//       email: 'ivan@mail.com',
-//       password: '123456',
-//     };
+  /**
+   * testing current route ========================================
+   */
+  test('test get current user', async () => {
+    const registerData = {
+      name: 'Ivan',
+      email: 'ivan@mail.com',
+      password: '123456',
+    };
 
-//     const loginData = {
-//       email: 'ivan@mail.com',
-//       password: '123456',
-//     };
+    const loginData = {
+      email: 'ivan@mail.com',
+      password: '123456',
+    };
 
-//     const registerUserRes = await request(app)
-//       .post('/api/users/register')
-//       .send(registerData);
+    const registerUserRes = await request(app)
+      .post('/api/users/register')
+      .send(registerData);
 
-//     const loginUserRes = await request(app)
-//       .post('/api/users/login')
-//       .send(loginData);
+    const loginUserRes = await request(app)
+      .post('/api/users/login')
+      .send(loginData);
 
-//     const { token } = loginUserRes.body;
+    const { token } = loginUserRes.body;
 
-//     console.log('token in test: ', token);
+    const res = await request(app)
+      .get('/api/users/current')
+      .set('Authorization', `Bearer ${token}`)
+      .send();
 
-//     const res = await request(app)
-//       .get('/api/users/current')
-//       .set('Authorization', `Bearer ${token}`)
-//       .send();
-
-//     console.log('res:::::::::::::::::::::::::::::::::::::::::: ', res.body);
-
-//     expect(registerUserRes.statusCode).toBe(201);
-//     expect(loginUserRes.statusCode).toBe(200);
-//     expect(res.statusCode).toBe(200);
-//     expect(res.body.user.name).toBe(registerData.name);
-//     expect(res.body.user.email).toBe(registerData.email);
-//     expect(res.body.user.avatarUrl).toBeDefined();
-//     expect(res.body.user.avatarUrl).not.toBeNull();
-//     expect(res.body.token).toBeDefined();
-//     expect(res.body.token).not.toBeNull();
-//   });
-// });
+    expect(registerUserRes.statusCode).toBe(201);
+    expect(loginUserRes.statusCode).toBe(200);
+    expect(res.statusCode).toBe(200);
+    expect(res.body.user.name).toBe(registerData.name);
+    expect(res.body.user.email).toBe(registerData.email);
+    expect(res.body.user.avatarUrl).toBeDefined();
+    expect(res.body.user.avatarUrl).not.toBeNull();
+    expect(res.body.user.subscription).toBeDefined();
+    expect(res.body.user.subscription).not.toBeNull();
+  });
+});
